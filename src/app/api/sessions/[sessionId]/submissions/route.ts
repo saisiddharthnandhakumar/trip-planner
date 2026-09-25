@@ -16,6 +16,8 @@ function validateBody(body: unknown) {
   const dealbreakers = typeof b?.dealbreakers === "string" ? b.dealbreakers : "";
   const submissionId =
     typeof b?.submission_id === "string" ? b.submission_id : undefined;
+  const joinRequestId =
+    typeof b?.join_request_id === "string" ? b.join_request_id : undefined;
 
   if (!name) return { error: "Name is required." };
   if (!Number.isFinite(budgetMin) || !Number.isFinite(budgetMax) || budgetMin < 0) {
@@ -43,6 +45,7 @@ function validateBody(body: unknown) {
 
   return {
     submissionId,
+    joinRequestId,
     values: {
       name,
       budget_min: Math.round(budgetMin),
@@ -82,7 +85,7 @@ export async function POST(request: Request, { params }: Params) {
 
   const { data: session, error: sessionError } = await supabase
     .from("sessions")
-    .select("id, deadline, locked")
+    .select("id, deadline, locked, max_participants")
     .eq("id", sessionId)
     .single();
 
@@ -115,9 +118,69 @@ export async function POST(request: Request, { params }: Params) {
     return NextResponse.json({ submission: data });
   }
 
+  if (session.max_participants !== null) {
+    const { count, error: countError } = await supabase
+      .from("submissions")
+      .select("id", { count: "exact", head: true })
+      .eq("session_id", sessionId);
+
+    if (countError) {
+      return NextResponse.json({ error: countError.message }, { status: 500 });
+    }
+
+    const atCapacity = (count ?? 0) >= session.max_participants;
+
+    if (atCapacity) {
+      if (!parsed.joinRequestId) {
+        return NextResponse.json(
+          {
+            error:
+              "This trip is full. Send a request to join instead of submitting directly.",
+          },
+          { status: 409 }
+        );
+      }
+
+      const { data: joinRequest, error: joinRequestError } = await supabase
+        .from("join_requests")
+        .select("id, session_id, status")
+        .eq("id", parsed.joinRequestId)
+        .single();
+
+      if (
+        joinRequestError ||
+        !joinRequest ||
+        joinRequest.session_id !== sessionId ||
+        joinRequest.status !== "approved"
+      ) {
+        return NextResponse.json(
+          { error: "Your join request hasn't been approved yet." },
+          { status: 403 }
+        );
+      }
+
+      const { data: existingUse } = await supabase
+        .from("submissions")
+        .select("id")
+        .eq("join_request_id", parsed.joinRequestId)
+        .maybeSingle();
+
+      if (existingUse) {
+        return NextResponse.json(
+          { error: "This join request has already been used." },
+          { status: 409 }
+        );
+      }
+    }
+  }
+
   const { data, error } = await supabase
     .from("submissions")
-    .insert({ ...parsed.values, session_id: sessionId })
+    .insert({
+      ...parsed.values,
+      session_id: sessionId,
+      join_request_id: parsed.joinRequestId ?? null,
+    })
     .select()
     .single();
 

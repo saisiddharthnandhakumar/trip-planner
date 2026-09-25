@@ -11,7 +11,7 @@ export async function POST(_request: Request, { params }: Params) {
 
   const { data: session, error: sessionError } = await supabase
     .from("sessions")
-    .select("id, deadline, locked")
+    .select("id, deadline, locked, description")
     .eq("id", sessionId)
     .single();
 
@@ -58,7 +58,10 @@ export async function POST(_request: Request, { params }: Params) {
   }
 
   try {
-    const options = await scoreDestinations(submissions as Submission[]);
+    const options = await scoreDestinations(
+      submissions as Submission[],
+      session.description ?? ""
+    );
 
     const { data: result, error: resultError } = await supabase
       .from("results")

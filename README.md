@@ -23,15 +23,24 @@ npm run dev
 
 ## How it works
 
-1. **Create** a trip at `/create` — title + deadline, get a `/trip/[id]` link.
+1. **Create** a trip at `/create` — title, a description of the occasion
+   (shown to everyone, and fed into Gemini's reasoning), a deadline, and an
+   optional max participant count. The creator's browser is remembered as
+   the trip admin via localStorage.
 2. **Submit** — anyone with the link fills in budget, dates, destination
    type, and dealbreakers. Editable until the deadline (tracked per-browser
-   via localStorage, since there's no auth).
-3. **Lock** — once the deadline passes, the page calls the lock API, which
-   flips `sessions.locked`, sends every submission to Gemini in one prompt,
-   and caches the result in `results`. It only ever calls Gemini once per
-   session.
-4. **Results** — option cards with a per-person fit score (1-5) and reason,
+   via localStorage, since there's no auth). Everyone with the link can copy
+   and re-share it.
+3. **Request to join** — once the trip hits its max participant count,
+   anyone new opening the link gets a lightweight "request to join" form
+   (name + message) instead of the full submission form. Only the admin's
+   browser sees the pending requests and can approve or deny them; an
+   approved request lets that one person submit past the cap.
+4. **Lock** — once the deadline passes, the page calls the lock API, which
+   flips `sessions.locked`, sends every submission (plus the trip
+   description) to Gemini in one prompt, and caches the result in `results`.
+   It only ever calls Gemini once per session.
+5. **Results** — option cards with a per-person fit score (1-5) and reason,
    read from the cached `results` row on every subsequent visit.
 
 ## Deploy

@@ -48,7 +48,7 @@ const RESPONSE_SCHEMA: Schema = {
   required: ["options"],
 };
 
-function buildPrompt(submissions: Submission[]): string {
+function buildPrompt(submissions: Submission[], tripDescription: string): string {
   const people = submissions
     .map((s) => {
       const dates = s.date_ranges
@@ -65,9 +65,13 @@ function buildPrompt(submissions: Submission[]): string {
     })
     .join("\n");
 
+  const context = tripDescription
+    ? `The trip's occasion and context, set by the organizer: "${tripDescription}". Weigh this alongside everyone's individual preferences below.\n\n`
+    : "";
+
   return `You are helping a group of ${submissions.length} friends pick a trip destination.
 
-Here is every participant's locked preferences:
+${context}Here is every participant's locked preferences:
 
 ${people}
 
@@ -86,7 +90,8 @@ Return only the destination options as structured data — no extra commentary.`
 }
 
 export async function scoreDestinations(
-  submissions: Submission[]
+  submissions: Submission[],
+  tripDescription: string
 ): Promise<DestinationOption[]> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -102,7 +107,7 @@ export async function scoreDestinations(
     },
   });
 
-  const prompt = buildPrompt(submissions);
+  const prompt = buildPrompt(submissions, tripDescription);
 
   let lastError: unknown;
   for (let attempt = 0; attempt < 2; attempt++) {

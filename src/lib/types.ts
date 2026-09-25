@@ -17,9 +17,23 @@ export type DateRange = {
 export type Session = {
   id: string;
   title: string;
+  description: string;
   deadline: string; // ISO timestamp
   created_at: string;
   locked: boolean;
+  max_participants: number | null;
+};
+
+export type JoinRequestStatus = "pending" | "approved" | "denied";
+
+export type JoinRequest = {
+  id: string;
+  session_id: string;
+  name: string;
+  message: string;
+  status: JoinRequestStatus;
+  requested_at: string;
+  decided_at: string | null;
 };
 
 export type Submission = {
@@ -32,6 +46,7 @@ export type Submission = {
   destination_types: DestinationType[];
   dealbreakers: string;
   submitted_at: string;
+  join_request_id: string | null;
 };
 
 export type Fit = {

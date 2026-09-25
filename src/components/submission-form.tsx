@@ -11,10 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { DESTINATION_TYPES, type DateRange, type Submission } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
-function localStorageKey(sessionId: string) {
-  return `trip-planner:submission:${sessionId}`;
-}
+import { submissionStorageKey } from "@/lib/local-storage";
 
 const emptyRange: DateRange = { start: "", end: "" };
 
@@ -31,10 +28,12 @@ export function SubmissionForm({
   sessionId,
   existingSubmissions,
   onSaved,
+  approvedJoinRequestId,
 }: {
   sessionId: string;
   existingSubmissions: Submission[];
-  onSaved: () => void;
+  onSaved: (saved: Submission) => void;
+  approvedJoinRequestId?: string;
 }) {
   const router = useRouter();
   const [submissionId, setSubmissionId] = useState<string | null>(null);
@@ -50,7 +49,7 @@ export function SubmissionForm({
   useEffect(() => {
     const storedId =
       typeof window !== "undefined"
-        ? window.localStorage.getItem(localStorageKey(sessionId))
+        ? window.localStorage.getItem(submissionStorageKey(sessionId))
         : null;
     if (!storedId) return;
     const existing = existingSubmissions.find((s) => s.id === storedId);
@@ -100,6 +99,7 @@ export function SubmissionForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           submission_id: submissionId ?? undefined,
+          join_request_id: submissionId ? undefined : approvedJoinRequestId,
           name,
           budget_min: Number(budgetMin),
           budget_max: Number(budgetMax),
@@ -115,10 +115,10 @@ export function SubmissionForm({
       }
       const saved = json.submission as Submission;
       setSubmissionId(saved.id);
-      window.localStorage.setItem(localStorageKey(sessionId), saved.id);
+      window.localStorage.setItem(submissionStorageKey(sessionId), saved.id);
       setEditing(false);
       toast.success(submissionId ? "Updated your submission." : "Submission saved!");
-      onSaved();
+      onSaved(saved);
       router.refresh();
     } catch {
       toast.error("Network error — please try again.");

@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { getSupabaseServiceClient } from "@/lib/supabase";
 import { TripSession } from "@/components/trip-session";
-import type { Result, Session, Submission } from "@/lib/types";
+import type { JoinRequest, Result, Session, Submission } from "@/lib/types";
 
 export default async function TripPage({
   params,
@@ -34,12 +34,20 @@ export default async function TripPage({
     .eq("session_id", sessionId)
     .maybeSingle<Result>();
 
+  const { data: joinRequests } = await supabase
+    .from("join_requests")
+    .select("*")
+    .eq("session_id", sessionId)
+    .order("requested_at", { ascending: true })
+    .returns<JoinRequest[]>();
+
   return (
     <main className="flex-1">
       <TripSession
         session={session}
         initialSubmissions={submissions ?? []}
         initialResult={result ?? null}
+        initialJoinRequests={joinRequests ?? []}
       />
     </main>
   );
