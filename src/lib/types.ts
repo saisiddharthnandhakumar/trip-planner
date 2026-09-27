@@ -65,10 +65,18 @@ export type InviteeInput = {
   name?: string | null;
 };
 
+export type FitLevel = "yes" | "partial" | "no";
+
 export type Fit = {
   name: string;
   score: number;
   reason: string;
+  /** Does this option fall inside this person's stated budget range? */
+  budgetFit: FitLevel;
+  /** Do this option's dates overlap this person's available date ranges? */
+  datesFit: FitLevel;
+  /** Does this option match one of this person's wanted destination types? */
+  typeFit: FitLevel;
 };
 
 export type DestinationOption = {

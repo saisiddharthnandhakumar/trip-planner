@@ -2,10 +2,15 @@ import { GoogleGenerativeAI, SchemaType, type Schema } from "@google/generative-
 import { z } from "zod";
 import type { DestinationOption, Submission } from "@/lib/types";
 
+const fitLevelSchema = z.enum(["yes", "partial", "no"]);
+
 const fitSchema = z.object({
   name: z.string(),
   score: z.number().min(1).max(5),
   reason: z.string(),
+  budgetFit: fitLevelSchema,
+  datesFit: fitLevelSchema,
+  typeFit: fitLevelSchema,
 });
 
 const optionSchema = z.object({
@@ -36,8 +41,30 @@ const RESPONSE_SCHEMA: Schema = {
                 name: { type: SchemaType.STRING },
                 score: { type: SchemaType.NUMBER },
                 reason: { type: SchemaType.STRING },
+                budgetFit: {
+                  type: SchemaType.STRING,
+                  format: "enum",
+                  enum: ["yes", "partial", "no"],
+                },
+                datesFit: {
+                  type: SchemaType.STRING,
+                  format: "enum",
+                  enum: ["yes", "partial", "no"],
+                },
+                typeFit: {
+                  type: SchemaType.STRING,
+                  format: "enum",
+                  enum: ["yes", "partial", "no"],
+                },
               },
-              required: ["name", "score", "reason"],
+              required: [
+                "name",
+                "score",
+                "reason",
+                "budgetFit",
+                "datesFit",
+                "typeFit",
+              ],
             },
           },
         },
@@ -78,13 +105,38 @@ ${people}
 Reason jointly over all of them together — not pairwise matching, not a fixed
 scoring formula. Look for overlap (shared available dates, a destination type
 more than one person wants) and conflict (one person's dealbreaker ruling out
-what others want). Propose 2 to 3 destination options. For every option, you
-must include a fit entry for every single person listed above — no one may be
-omitted. Each fit needs a score from 1 to 5 and a one-line reason grounded in
-that person's actual stated preferences. Destinations may come from your own
-general knowledge of real places; you do not have live pricing or
+what others want). Propose 2 to 3 destination options, and every option must
+be a real place in India — do not propose anywhere outside India, regardless
+of what destination types or vibes people asked for (map "beach" to an Indian
+coast, "mountain" to somewhere like the Himalayas or Western Ghats, and so
+on). For every option, you must include a fit entry for every single person
+listed above — no one may be omitted. Destinations may come from your own
+general knowledge of real places in India; you do not have live pricing or
 availability data, so keep destinations realistic but do not claim specific
 prices or availability.
+
+For every person's fit entry, be explicit and transparent about *why* they
+got that score, so anyone reading it can tell at a glance whether it's a
+budget match, a calendar/date-availability match, or a destination-type
+match:
+- budgetFit: "yes" if the option's realistic cost sits inside their stated
+  budget range, "partial" if it's borderline or only affordable with
+  compromises, "no" if it's clearly outside their range.
+- datesFit: "yes" if the option's timing overlaps their available date
+  ranges, "partial" if it overlaps only part of the group's shared window,
+  "no" if it conflicts with their stated availability.
+- typeFit: "yes" if the option matches one of their wanted destination
+  types, "partial" if it's an adjacent/compromise vibe, "no" if it doesn't
+  match any of their wanted types.
+- reason: one line in plain language naming the specific factor(s) driving
+  the score (e.g. "Fits your $X-Y budget and June dates, but it's a city
+  trip, not the beach you wanted").
+
+Score honestly — do not inflate a score to make an option look like a
+consensus pick when it isn't one. If every realistic option leaves someone at
+a 1 or 2, still propose your best 2-3 options, but say so plainly in that
+option's summary (name who it doesn't work for and why) rather than hiding
+the mismatch.
 
 Return only the destination options as structured data — no extra commentary.`;
 }

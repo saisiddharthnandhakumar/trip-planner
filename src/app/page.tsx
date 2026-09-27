@@ -23,7 +23,7 @@ const STEPS = [
   {
     number: "03",
     title: "Get your shortlist",
-    body: "The second the deadline hits, we score a few destinations against everyone's answers and rank them.",
+    body: "The moment everyone's answered — or the deadline hits, whichever comes first — we score a few destinations against everyone's answers and rank them.",
   },
 ];
 
@@ -38,11 +38,11 @@ export default function Home() {
           aria-hidden
           className="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,var(--background)_15%,transparent_60%)]"
         />
-        <div className="relative z-10 mx-auto flex h-full max-w-xl flex-col items-center justify-center px-4 text-center sm:px-6">
-          <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-5xl">
+        <div className="relative z-10 mx-auto flex h-full max-w-lg flex-col items-center justify-center px-4 text-center sm:px-6">
+          <h1 className="font-heading text-balance text-4xl leading-[1.1] font-medium sm:text-6xl">
             Stop re-opening the group chat.
           </h1>
-          <p className="mt-4 text-balance text-muted-foreground">
+          <p className="mt-5 max-w-sm text-balance leading-relaxed text-muted-foreground">
             Set a deadline, everyone submits their budget and dates once, and
             you get a short, ranked list of places that actually work for the
             group.

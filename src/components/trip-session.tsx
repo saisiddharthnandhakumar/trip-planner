@@ -174,6 +174,33 @@ export function TripSession({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locked]);
 
+  const attemptEarlyLock = useCallback(async () => {
+    if (lockRequested.current || locked || result) return;
+    try {
+      const res = await fetch(`/api/sessions/${session.id}/lock`, {
+        method: "POST",
+      });
+      // A 409 just means the roster isn't complete yet — that's expected
+      // most of the time, so stay quiet and let the deadline handle it.
+      if (!res.ok) return;
+      const json = await res.json();
+      lockRequested.current = true;
+      setLocked(true);
+      setResult(json.result);
+    } catch {
+      // Best-effort probe; the deadline is still the fallback trigger.
+    }
+  }, [session.id, locked, result]);
+
+  useEffect(() => {
+    // Whenever the submission count changes, check whether everyone invited
+    // has now responded (or the participant cap is filled) so the group
+    // doesn't have to wait out the rest of the deadline to see results.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    attemptEarlyLock();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [submissions.length]);
+
   function copyLink() {
     navigator.clipboard.writeText(window.location.href);
     toast.success("Link copied — share it with the group.");
@@ -191,7 +218,7 @@ export function TripSession({
     <div className="mx-auto flex max-w-3xl flex-col gap-8 px-4 py-8 sm:px-6">
       <div className="space-y-3">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+          <h1 className="font-heading text-2xl font-medium sm:text-3xl">
             {session.title}
           </h1>
           <Button variant="ghost" onClick={copyLink}>

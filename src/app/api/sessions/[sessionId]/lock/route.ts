@@ -11,7 +11,7 @@ export async function POST(_request: Request, { params }: Params) {
 
   const { data: session, error: sessionError } = await supabase
     .from("sessions")
-    .select("id, deadline, locked, description")
+    .select("id, deadline, locked, description, max_participants")
     .eq("id", sessionId)
     .single();
 
@@ -30,7 +30,37 @@ export async function POST(_request: Request, { params }: Params) {
     return NextResponse.json({ result: existingResult });
   }
 
-  if (new Date(session.deadline).getTime() > Date.now()) {
+  const { data: submissions, error: submissionsError } = await supabase
+    .from("submissions")
+    .select("*")
+    .eq("session_id", sessionId);
+
+  if (submissionsError) {
+    return NextResponse.json({ error: submissionsError.message }, { status: 500 });
+  }
+
+  const { data: invitees, error: inviteesError } = await supabase
+    .from("invitees")
+    .select("id")
+    .eq("session_id", sessionId);
+
+  if (inviteesError) {
+    return NextResponse.json({ error: inviteesError.message }, { status: 500 });
+  }
+
+  // The roster is "complete" — and we don't need to wait for the deadline —
+  // when every invited person has submitted, or (for open-link trips with no
+  // fixed invite list) the participant cap has been reached.
+  const respondedInviteeIds = new Set(
+    (submissions ?? []).map((s) => s.invitee_id).filter((id): id is string => Boolean(id))
+  );
+  const rosterComplete =
+    invitees && invitees.length > 0
+      ? invitees.every((inv) => respondedInviteeIds.has(inv.id))
+      : session.max_participants !== null &&
+        (submissions?.length ?? 0) >= session.max_participants;
+
+  if (!rosterComplete && new Date(session.deadline).getTime() > Date.now()) {
     return NextResponse.json(
       { error: "The deadline hasn't passed yet." },
       { status: 409 }
@@ -39,15 +69,6 @@ export async function POST(_request: Request, { params }: Params) {
 
   if (!session.locked) {
     await supabase.from("sessions").update({ locked: true }).eq("id", sessionId);
-  }
-
-  const { data: submissions, error: submissionsError } = await supabase
-    .from("submissions")
-    .select("*")
-    .eq("session_id", sessionId);
-
-  if (submissionsError) {
-    return NextResponse.json({ error: submissionsError.message }, { status: 500 });
   }
 
   if (!submissions || submissions.length === 0) {
