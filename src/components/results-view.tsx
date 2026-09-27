@@ -21,12 +21,14 @@ function ScoreDots({ score }: { score: number }) {
 export function ResultsView({ options }: { options: DestinationOption[] }) {
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">Your options</h2>
+      <h2 className="text-sm font-semibold tracking-tight">Your options</h2>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {options.map((option, i) => (
           <Card key={option.destination + i} className="flex flex-col">
             <CardHeader>
-              <CardTitle className="text-xl">{option.destination}</CardTitle>
+              <CardTitle className="text-xl font-semibold tracking-tight">
+                {option.destination}
+              </CardTitle>
               <p className="text-sm text-muted-foreground">{option.summary}</p>
             </CardHeader>
             <CardContent className="flex-1">

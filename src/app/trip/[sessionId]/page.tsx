@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { getSupabaseServiceClient } from "@/lib/supabase";
 import { TripSession } from "@/components/trip-session";
@@ -43,12 +44,14 @@ export default async function TripPage({
 
   return (
     <main className="flex-1">
-      <TripSession
-        session={session}
-        initialSubmissions={submissions ?? []}
-        initialResult={result ?? null}
-        initialJoinRequests={joinRequests ?? []}
-      />
+      <Suspense>
+        <TripSession
+          session={session}
+          initialSubmissions={submissions ?? []}
+          initialResult={result ?? null}
+          initialJoinRequests={joinRequests ?? []}
+        />
+      </Suspense>
     </main>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -49,9 +50,9 @@ export function AdminRequestsPanel({
   if (joinRequests.length === 0) return null;
 
   return (
-    <div className="space-y-3 rounded-lg border border-border bg-card p-5">
+    <div className="space-y-3 rounded-lg border border-border bg-card p-6">
       <div className="flex items-center justify-between">
-        <h2 className="font-medium">Join requests</h2>
+        <h2 className="text-sm font-semibold tracking-tight">Join requests</h2>
         {pending.length > 0 && <Badge>{pending.length} pending</Badge>}
       </div>
       {pending.length === 0 && decided.length === 0 && (
@@ -94,9 +95,14 @@ export function AdminRequestsPanel({
             className="flex items-center justify-between border-t border-border pt-3 text-sm first:border-t-0 first:pt-0"
           >
             <span>{r.name}</span>
-            <Badge variant={r.status === "approved" ? "secondary" : "outline"}>
+            <span className="flex items-center gap-1 text-muted-foreground">
+              {r.status === "approved" ? (
+                <Check className="size-3.5" />
+              ) : (
+                <X className="size-3.5" />
+              )}
               {r.status}
-            </Badge>
+            </span>
           </li>
         ))}
       </ul>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 function getParts(msRemaining: number) {
@@ -48,38 +49,30 @@ export function CountdownTimer({
 
   if (locked || expired) {
     return (
-      <div className="flex items-center gap-2 rounded-lg border border-border bg-muted px-4 py-3 text-sm font-medium text-muted-foreground">
-        <span className="h-2 w-2 rounded-full bg-muted-foreground" />
+      <div className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-3.5 py-1.5 text-sm font-medium text-muted-foreground">
+        <Lock className="size-3.5" />
         Submissions are locked
       </div>
     );
   }
 
   if (msRemaining === null) {
-    return (
-      <div className="h-[52px] w-full max-w-xs animate-pulse rounded-lg bg-muted" />
-    );
+    return <div className="h-8 w-40 animate-pulse rounded-full bg-muted" />;
   }
 
   const { days, hours, minutes, seconds } = getParts(msRemaining);
   const urgent = msRemaining <= 60 * 60 * 1000;
 
   return (
-    <div
-      className={cn(
-        "flex items-center gap-3 rounded-lg border px-4 py-3 transition-colors",
-        urgent
-          ? "border-amber-300 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-200"
-          : "border-border bg-card"
-      )}
-    >
-      <span
+    <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3.5 py-1.5">
+      <div
         className={cn(
-          "h-2 w-2 shrink-0 rounded-full",
-          urgent ? "animate-pulse bg-amber-500" : "bg-emerald-500"
+          "flex items-baseline gap-1.5 font-mono tabular-nums",
+          urgent
+            ? "animate-pulse text-lg font-semibold motion-reduce:animate-none sm:text-xl"
+            : "text-sm font-medium sm:text-base"
         )}
-      />
-      <div className="flex items-baseline gap-1.5 font-mono text-sm tabular-nums sm:text-base">
+      >
         {days > 0 && (
           <span>
             <strong className="font-semibold">{days}</strong>d
@@ -94,10 +87,8 @@ export function CountdownTimer({
         <span>
           <strong className="font-semibold">{pad(seconds)}</strong>s
         </span>
-        <span className="ml-1 text-xs font-normal text-muted-foreground">
-          until deadline
-        </span>
       </div>
+      <span className="text-xs text-muted-foreground">until deadline</span>
     </div>
   );
 }

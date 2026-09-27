@@ -47,6 +47,22 @@ export type Submission = {
   dealbreakers: string;
   submitted_at: string;
   join_request_id: string | null;
+  invitee_id: string | null;
+};
+
+export type Invitee = {
+  id: string;
+  session_id: string;
+  phone_number: string;
+  name: string | null;
+  token: string;
+  last_nudged_at: string | null;
+  created_at: string;
+};
+
+export type InviteeInput = {
+  phone_number: string;
+  name?: string | null;
 };
 
 export type Fit = {

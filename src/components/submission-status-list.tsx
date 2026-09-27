@@ -8,15 +8,17 @@ export function SubmissionStatusList({
   submissions: Submission[];
   maxParticipants: number | null;
 }) {
+  const inviteeLinkedCount = submissions.filter((s) => s.invitee_id).length;
+
   return (
-    <div className="rounded-lg border border-border bg-card p-5">
+    <div className="border-t border-border pt-4">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="font-medium">Who&apos;s in</h2>
-        <Badge variant="secondary">
+        <h2 className="text-sm font-semibold tracking-tight">Who&apos;s in</h2>
+        <span className="text-sm text-muted-foreground">
           {maxParticipants !== null
-            ? `${submissions.length} / ${maxParticipants} submitted`
+            ? `${inviteeLinkedCount} / ${maxParticipants} submitted`
             : `${submissions.length} submitted`}
-        </Badge>
+        </span>
       </div>
       {submissions.length === 0 ? (
         <p className="text-sm text-muted-foreground">

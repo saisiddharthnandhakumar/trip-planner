@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { DESTINATION_TYPES, type DateRange, type Submission } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -29,11 +28,15 @@ export function SubmissionForm({
   existingSubmissions,
   onSaved,
   approvedJoinRequestId,
+  inviteeId,
+  prefillName,
 }: {
   sessionId: string;
   existingSubmissions: Submission[];
   onSaved: (saved: Submission) => void;
   approvedJoinRequestId?: string;
+  inviteeId?: string;
+  prefillName?: string;
 }) {
   const router = useRouter();
   const [submissionId, setSubmissionId] = useState<string | null>(null);
@@ -45,15 +48,19 @@ export function SubmissionForm({
   const [dealbreakers, setDealbreakers] = useState("");
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(true);
+  const hydratedRef = useRef(false);
 
   useEffect(() => {
+    if (hydratedRef.current) return;
     const storedId =
       typeof window !== "undefined"
         ? window.localStorage.getItem(submissionStorageKey(sessionId))
         : null;
-    if (!storedId) return;
-    const existing = existingSubmissions.find((s) => s.id === storedId);
+    const existing = storedId
+      ? existingSubmissions.find((s) => s.id === storedId)
+      : undefined;
     if (existing) {
+      hydratedRef.current = true;
       // Hydrating form state from localStorage + fetched submissions, a one-time sync from external state.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSubmissionId(existing.id);
@@ -66,9 +73,14 @@ export function SubmissionForm({
       setTypes(existing.destination_types);
       setDealbreakers(existing.dealbreakers);
       setEditing(false);
+      return;
+    }
+    if (prefillName) {
+      hydratedRef.current = true;
+      setName(prefillName);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionId, existingSubmissions.length]);
+  }, [sessionId, existingSubmissions.length, inviteeId, prefillName]);
 
   function toggleType(type: string) {
     setTypes((prev) =>
@@ -100,6 +112,7 @@ export function SubmissionForm({
         body: JSON.stringify({
           submission_id: submissionId ?? undefined,
           join_request_id: submissionId ? undefined : approvedJoinRequestId,
+          invitee_id: submissionId ? undefined : inviteeId,
           name,
           budget_min: Number(budgetMin),
           budget_max: Number(budgetMax),
@@ -129,7 +142,7 @@ export function SubmissionForm({
 
   if (!editing && submissionId) {
     return (
-      <div className="rounded-lg border border-border bg-card p-5">
+      <div className="rounded-lg border border-border bg-card p-6">
         <div className="flex items-center justify-between gap-4">
           <div>
             <p className="font-medium">You&apos;re in, {name}.</p>
@@ -146,7 +159,7 @@ export function SubmissionForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 rounded-lg border border-border bg-card p-5">
+    <form onSubmit={handleSubmit} className="space-y-6 rounded-lg border border-border bg-card p-6">
       <div className="space-y-2">
         <Label htmlFor="name">Your name</Label>
         <Input
@@ -186,7 +199,7 @@ export function SubmissionForm({
       <div className="space-y-3">
         <Label>Available dates</Label>
         {dateRanges.map((range, i) => (
-          <div key={i} className="flex items-center gap-2">
+          <div key={i} className="flex items-center gap-3">
             <Input
               type="date"
               value={range.start}
@@ -226,7 +239,7 @@ export function SubmissionForm({
               className={cn(
                 "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors",
                 types.includes(type)
-                  ? "border-primary bg-primary/5"
+                  ? "border-primary bg-primary/10 font-medium text-primary"
                   : "border-border hover:bg-muted"
               )}
             >
@@ -250,8 +263,6 @@ export function SubmissionForm({
           rows={3}
         />
       </div>
-
-      <Separator />
 
       <Button type="submit" disabled={saving} className="w-full sm:w-auto">
         {saving ? "Saving..." : submissionId ? "Save changes" : "Submit"}

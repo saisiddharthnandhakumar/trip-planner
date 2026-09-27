@@ -18,6 +18,8 @@ function validateBody(body: unknown) {
     typeof b?.submission_id === "string" ? b.submission_id : undefined;
   const joinRequestId =
     typeof b?.join_request_id === "string" ? b.join_request_id : undefined;
+  const inviteeId =
+    typeof b?.invitee_id === "string" ? b.invitee_id : undefined;
 
   if (!name) return { error: "Name is required." };
   if (!Number.isFinite(budgetMin) || !Number.isFinite(budgetMax) || budgetMin < 0) {
@@ -46,6 +48,7 @@ function validateBody(body: unknown) {
   return {
     submissionId,
     joinRequestId,
+    inviteeId,
     values: {
       name,
       budget_min: Math.round(budgetMin),
@@ -118,11 +121,50 @@ export async function POST(request: Request, { params }: Params) {
     return NextResponse.json({ submission: data });
   }
 
-  if (session.max_participants !== null) {
+  if (parsed.joinRequestId && parsed.inviteeId) {
+    return NextResponse.json(
+      { error: "A submission can't be linked to both an invite and a join request." },
+      { status: 400 }
+    );
+  }
+
+  let validatedInviteeId: string | null = null;
+  if (parsed.inviteeId) {
+    const { data: invitee, error: inviteeError } = await supabase
+      .from("invitees")
+      .select("id, session_id")
+      .eq("id", parsed.inviteeId)
+      .single();
+
+    if (inviteeError || !invitee || invitee.session_id !== sessionId) {
+      return NextResponse.json({ error: "Invite not found." }, { status: 404 });
+    }
+
+    const { data: existingUse } = await supabase
+      .from("submissions")
+      .select("id")
+      .eq("invitee_id", parsed.inviteeId)
+      .maybeSingle();
+
+    if (existingUse) {
+      return NextResponse.json(
+        { error: "This invite link has already been used to submit." },
+        { status: 409 }
+      );
+    }
+
+    validatedInviteeId = parsed.inviteeId;
+  }
+
+  // Roster capacity is scoped to invitee-linked submissions only, so the
+  // admin's own submission (no invitee_id) and an invitee's own submission
+  // never trip this gate — only a stranger via the shared link can hit it.
+  if (!validatedInviteeId && session.max_participants !== null) {
     const { count, error: countError } = await supabase
       .from("submissions")
       .select("id", { count: "exact", head: true })
-      .eq("session_id", sessionId);
+      .eq("session_id", sessionId)
+      .not("invitee_id", "is", null);
 
     if (countError) {
       return NextResponse.json({ error: countError.message }, { status: 500 });
@@ -159,13 +201,13 @@ export async function POST(request: Request, { params }: Params) {
         );
       }
 
-      const { data: existingUse } = await supabase
+      const { data: existingJoinRequestUse } = await supabase
         .from("submissions")
         .select("id")
         .eq("join_request_id", parsed.joinRequestId)
         .maybeSingle();
 
-      if (existingUse) {
+      if (existingJoinRequestUse) {
         return NextResponse.json(
           { error: "This join request has already been used." },
           { status: 409 }
@@ -180,6 +222,7 @@ export async function POST(request: Request, { params }: Params) {
       ...parsed.values,
       session_id: sessionId,
       join_request_id: parsed.joinRequestId ?? null,
+      invitee_id: validatedInviteeId,
     })
     .select()
     .single();
