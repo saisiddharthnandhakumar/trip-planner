@@ -1,6 +1,13 @@
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { ImageStreamHero } from "@/components/ui/image-stream-hero";
+import { INDIA_DESTINATIONS } from "@/lib/india-destinations";
+
+const HERO_IMAGES = INDIA_DESTINATIONS.map((d) => ({
+  src: d.image,
+  alt: d.name,
+}));
 
 const STEPS = [
   {
@@ -22,30 +29,37 @@ const STEPS = [
 
 export default function Home() {
   return (
-    <main className="relative flex flex-1 items-center justify-center overflow-hidden px-4 py-16 sm:px-6">
-      <div
-        aria-hidden
-        className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_50%_0%,var(--primary)_0%,transparent_60%)] opacity-[0.06]"
-      />
-      <div className="mx-auto max-w-xl text-center">
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-          Stop re-opening the group chat.
-        </h1>
-        <p className="mt-4 text-balance text-muted-foreground">
-          Set a deadline, everyone submits their budget and dates once, and
-          you get a short, ranked list of places that actually work for the
-          group.
-        </p>
-        <div className="mt-8 flex flex-col items-center gap-3">
-          <Link href="/create" className={buttonVariants({ size: "lg" })}>
-            Create a trip
-          </Link>
-          <p className="text-xs text-muted-foreground">
-            No login. Just a link you send to the group.
+    <main className="relative flex flex-1 flex-col items-center overflow-hidden">
+      <ImageStreamHero
+        images={HERO_IMAGES}
+        className="h-[540px] w-full sm:h-[560px]"
+      >
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-[radial-gradient(circle_at_50%_45%,var(--background)_15%,transparent_60%)]"
+        />
+        <div className="relative z-10 mx-auto flex h-full max-w-xl flex-col items-center justify-center px-4 text-center sm:px-6">
+          <h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-5xl">
+            Stop re-opening the group chat.
+          </h1>
+          <p className="mt-4 text-balance text-muted-foreground">
+            Set a deadline, everyone submits their budget and dates once, and
+            you get a short, ranked list of places that actually work for the
+            group.
           </p>
+          <div className="mt-8 flex flex-col items-center gap-3">
+            <Link href="/create" className={buttonVariants({ size: "lg" })}>
+              Create a trip
+            </Link>
+            <p className="text-xs text-muted-foreground">
+              No login. Just a link you send to the group.
+            </p>
+          </div>
         </div>
+      </ImageStreamHero>
 
-        <div className="mt-16 flex flex-col gap-6 text-left sm:flex-row sm:gap-0">
+      <div className="mx-auto w-full max-w-xl px-4 py-16 sm:px-6">
+        <div className="flex flex-col gap-6 text-left sm:flex-row sm:gap-0">
           {STEPS.map((step, i) => (
             <div key={step.number} className="flex sm:flex-1">
               {i > 0 && (
