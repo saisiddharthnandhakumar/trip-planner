@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { CalendarClock, ClipboardList, Sparkles } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ImageStreamHero } from "@/components/ui/image-stream-hero";
@@ -12,16 +13,19 @@ const HERO_IMAGES = INDIA_DESTINATIONS.map((d) => ({
 const STEPS = [
   {
     number: "01",
+    icon: CalendarClock,
     title: "Set a deadline",
     body: "Create a trip, set a hard deadline, and send the link to everyone who's coming.",
   },
   {
     number: "02",
+    icon: ClipboardList,
     title: "Everyone submits once",
     body: "Budget, dates, vibe, dealbreakers — each person fills it in once, and can edit until the deadline.",
   },
   {
     number: "03",
+    icon: Sparkles,
     title: "Get your shortlist",
     body: "The moment everyone's answered — or the deadline hits, whichever comes first — we score a few destinations against everyone's answers and rank them.",
   },
@@ -58,26 +62,49 @@ export default function Home() {
         </div>
       </ImageStreamHero>
 
-      <div className="mx-auto w-full max-w-xl px-4 py-16 sm:px-6">
-        <div className="flex flex-col gap-6 text-left sm:flex-row sm:gap-0">
+      <div className="w-full max-w-3xl px-4 py-16 sm:px-6">
+        <div className="flex flex-col gap-8 text-left sm:flex-row sm:gap-0">
           {STEPS.map((step, i) => (
             <div key={step.number} className="flex sm:flex-1">
               {i > 0 && (
                 <Separator
                   orientation="vertical"
-                  className="mr-6 hidden sm:block"
+                  className="mr-8 hidden sm:block"
                 />
               )}
-              {i > 0 && <div className="mb-6 border-t border-border sm:hidden" />}
+              {i > 0 && <div className="mb-8 border-t border-border sm:hidden" />}
               <div>
-                <p className="font-mono text-2xl text-primary">{step.number}</p>
-                <p className="mt-2 text-sm font-semibold tracking-tight">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <step.icon className="size-4.5" aria-hidden />
+                  </span>
+                  <span className="font-mono text-sm text-muted-foreground">
+                    {step.number}
+                  </span>
+                </div>
+                <p className="font-heading mt-3 text-lg font-medium">
                   {step.title}
                 </p>
-                <p className="mt-1 text-sm text-muted-foreground">{step.body}</p>
+                <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
+                  {step.body}
+                </p>
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      <div className="w-full border-t border-border bg-muted/30">
+        <div className="mx-auto flex max-w-3xl flex-col items-center gap-4 px-4 py-16 text-center sm:px-6">
+          <h2 className="font-heading text-2xl font-medium sm:text-3xl">
+            Ready to stop the back-and-forth?
+          </h2>
+          <p className="max-w-sm text-balance text-sm text-muted-foreground">
+            Create a trip in under a minute — no accounts, no app to install.
+          </p>
+          <Link href="/create" className={buttonVariants({ size: "lg" })}>
+            Create a trip
+          </Link>
         </div>
       </div>
     </main>

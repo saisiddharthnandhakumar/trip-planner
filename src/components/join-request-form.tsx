@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import type { JoinRequest } from "@/lib/types";
 import { joinRequestStorageKey } from "@/lib/local-storage";
@@ -46,39 +47,40 @@ export function JoinRequestForm({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-5 rounded-lg border border-border bg-card p-6"
-    >
-      <div>
-        <p className="font-medium">All invited spots are filled</p>
-        <p className="text-sm text-muted-foreground">
-          Send a request to join and the trip creator can add you.
-        </p>
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="request-name">Your name</Label>
-        <Input
-          id="request-name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="Your name"
-          required
-        />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="request-message">Message (optional)</Label>
-        <Textarea
-          id="request-message"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Why you'd like to join..."
-          rows={2}
-        />
-      </div>
-      <Button type="submit" disabled={saving}>
-        {saving ? "Sending..." : "Request to join"}
-      </Button>
-    </form>
+    <Card>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <p className="font-medium">All invited spots are filled</p>
+            <p className="text-sm text-muted-foreground">
+              Send a request to join and the trip creator can add you.
+            </p>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="request-name">Your name</Label>
+            <Input
+              id="request-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your name"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="request-message">Message (optional)</Label>
+            <Textarea
+              id="request-message"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Why you'd like to join..."
+              rows={2}
+            />
+          </div>
+          <Button type="submit" disabled={saving}>
+            {saving ? "Sending..." : "Request to join"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

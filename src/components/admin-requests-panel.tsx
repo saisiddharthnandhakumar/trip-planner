@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import type { JoinRequest } from "@/lib/types";
 
@@ -50,11 +51,12 @@ export function AdminRequestsPanel({
   if (joinRequests.length === 0) return null;
 
   return (
-    <div className="space-y-3 rounded-lg border border-border bg-card p-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-sm font-semibold tracking-tight">Join requests</h2>
+    <Card>
+      <CardHeader className="flex-row items-center justify-between">
+        <CardTitle>Join requests</CardTitle>
         {pending.length > 0 && <Badge>{pending.length} pending</Badge>}
-      </div>
+      </CardHeader>
+      <CardContent className="space-y-3">
       {pending.length === 0 && decided.length === 0 && (
         <p className="text-sm text-muted-foreground">No requests yet.</p>
       )}
@@ -106,6 +108,7 @@ export function AdminRequestsPanel({
           </li>
         ))}
       </ul>
-    </div>
+      </CardContent>
+    </Card>
   );
 }

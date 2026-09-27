@@ -4,7 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Link as LinkIcon } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { Link as LinkIcon, TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
 import { CountdownTimer } from "@/components/countdown-timer";
 import { SubmissionForm } from "@/components/submission-form";
@@ -309,8 +311,8 @@ export function TripSession({
               }
             />
           ) : myJoinRequest ? (
-            <div className="rounded-lg border border-border bg-card p-6">
-              <div className="flex items-center justify-between gap-3">
+            <Card>
+              <CardContent className="flex items-center justify-between gap-3">
                 <div>
                   <p className="font-medium">
                     {myJoinRequest.status === "pending" &&
@@ -332,8 +334,8 @@ export function TripSession({
                 >
                   {myJoinRequest.status}
                 </Badge>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ) : (
             <JoinRequestForm
               sessionId={session.id}
@@ -347,33 +349,40 @@ export function TripSession({
       )}
 
       {locked && !result && !scoreError && (
-        <div className="space-y-4 rounded-lg border border-border bg-card p-6 text-center">
-          <p className="font-medium">Scoring destinations against everyone&apos;s answers…</p>
-          <p className="text-sm text-muted-foreground">
-            This takes a few seconds and only happens once.
-          </p>
-          <div className="space-y-2">
-            <Skeleton className="h-24 w-full" />
-            <Skeleton className="h-24 w-full" />
-          </div>
-        </div>
+        <Card>
+          <CardContent className="space-y-4 text-center">
+            <p className="font-medium">Scoring destinations against everyone&apos;s answers…</p>
+            <p className="text-sm text-muted-foreground">
+              This takes a few seconds and only happens once.
+            </p>
+            <div className="space-y-2">
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {locked && scoreError && (
-        <div className="space-y-3 rounded-lg border border-destructive/30 bg-destructive/5 p-6">
-          <p className="font-medium text-destructive">Scoring failed</p>
-          <p className="text-sm text-muted-foreground">{scoreError}</p>
-          <Button
-            variant="outline"
-            onClick={() => {
-              lockRequested.current = false;
-              setScoreError(null);
-              triggerLock();
-            }}
-          >
-            Try again
-          </Button>
-        </div>
+        <Alert variant="destructive">
+          <TriangleAlert />
+          <AlertTitle>Scoring failed</AlertTitle>
+          <AlertDescription>
+            <p>{scoreError}</p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-1"
+              onClick={() => {
+                lockRequested.current = false;
+                setScoreError(null);
+                triggerLock();
+              }}
+            >
+              Try again
+            </Button>
+          </AlertDescription>
+        </Alert>
       )}
 
       {result && <ResultsView options={result.options} />}

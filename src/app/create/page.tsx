@@ -7,6 +7,14 @@ import { SubmissionForm } from "@/components/submission-form";
 import { adminStorageKey } from "@/lib/local-storage";
 import type { Session } from "@/lib/types";
 
+function StepIndicator({ step }: { step: 1 | 2 }) {
+  return (
+    <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+      Step {step} of 2
+    </p>
+  );
+}
+
 export default function CreateTripPage() {
   const router = useRouter();
   const [session, setSession] = useState<Session | null>(null);
@@ -14,12 +22,15 @@ export default function CreateTripPage() {
   if (!session) {
     return (
       <main className="flex flex-1 items-center justify-center px-4 py-12 sm:px-6">
-        <CreateTripRosterForm
-          onCreated={(createdSession) => {
-            window.localStorage.setItem(adminStorageKey(createdSession.id), "true");
-            setSession(createdSession);
-          }}
-        />
+        <div className="w-full max-w-lg space-y-4">
+          <StepIndicator step={1} />
+          <CreateTripRosterForm
+            onCreated={(createdSession) => {
+              window.localStorage.setItem(adminStorageKey(createdSession.id), "true");
+              setSession(createdSession);
+            }}
+          />
+        </div>
       </main>
     );
   }
@@ -27,8 +38,9 @@ export default function CreateTripPage() {
   return (
     <main className="flex flex-1 justify-center px-4 py-12 sm:px-6">
       <div className="w-full max-w-lg space-y-4">
+        <StepIndicator step={2} />
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="font-heading text-2xl font-medium">
             Add your own preferences
           </h1>
           <p className="text-sm text-muted-foreground">

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import type { Invitee, Submission } from "@/lib/types";
 
@@ -75,8 +76,11 @@ export function WaitingOnPanel({
   }
 
   return (
-    <div className="space-y-3 rounded-lg border border-border bg-card p-6">
-      <h2 className="text-sm font-semibold tracking-tight">Waiting on</h2>
+    <Card>
+      <CardHeader>
+        <CardTitle>Waiting on</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
       {waiting.length === 0 ? (
         <p className="text-sm text-muted-foreground">Everyone has responded.</p>
       ) : (
@@ -107,6 +111,7 @@ export function WaitingOnPanel({
           ))}
         </ul>
       )}
-    </div>
+      </CardContent>
+    </Card>
   );
 }

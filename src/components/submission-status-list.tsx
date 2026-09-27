@@ -1,3 +1,4 @@
+import { Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { Submission } from "@/lib/types";
 
@@ -13,7 +14,10 @@ export function SubmissionStatusList({
   return (
     <div className="border-t border-border pt-4">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-semibold tracking-tight">Who&apos;s in</h2>
+        <h2 className="flex items-center gap-1.5 text-sm font-semibold tracking-tight">
+          <Users className="size-4 text-muted-foreground" aria-hidden />
+          Who&apos;s in
+        </h2>
         <span className="text-sm text-muted-foreground">
           {maxParticipants !== null
             ? `${inviteeLinkedCount} / ${maxParticipants} submitted`

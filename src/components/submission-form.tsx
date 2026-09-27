@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { DESTINATION_TYPES, type DateRange, type Submission } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -142,8 +143,8 @@ export function SubmissionForm({
 
   if (!editing && submissionId) {
     return (
-      <div className="rounded-lg border border-border bg-card p-6">
-        <div className="flex items-center justify-between gap-4">
+      <Card>
+        <CardContent className="flex items-center justify-between gap-4">
           <div>
             <p className="font-medium">You&apos;re in, {name}.</p>
             <p className="text-sm text-muted-foreground">
@@ -153,13 +154,15 @@ export function SubmissionForm({
           <Button variant="outline" onClick={() => setEditing(true)}>
             Edit
           </Button>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 rounded-lg border border-border bg-card p-6">
+    <Card>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="name">Your name</Label>
         <Input
@@ -267,6 +270,8 @@ export function SubmissionForm({
       <Button type="submit" disabled={saving} className="w-full sm:w-auto">
         {saving ? "Saving..." : submissionId ? "Save changes" : "Submit"}
       </Button>
-    </form>
+        </form>
+      </CardContent>
+    </Card>
   );
 }
